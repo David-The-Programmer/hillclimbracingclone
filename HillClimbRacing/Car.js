@@ -172,6 +172,7 @@ class Car {
     shoulderToCarDistanceJointDef.Initialize(this.person.body.body, this.chassisBody, shouldersVector, carFrontVector);
     shoulderToCarDistanceJointDef.dampingRatio = 0.1;
     shoulderToCarDistanceJointDef.frequencyHz = 5;
+    shoulderToCarDistanceJointDef.length *= 1.1;
     this.shoulderDistanceJoint = world.CreateJoint(shoulderToCarDistanceJointDef);
 
 

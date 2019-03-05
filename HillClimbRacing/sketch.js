@@ -46,6 +46,8 @@ const BODY_WIDTH = 10;
 
 const BODY_HEIGHT = 30;
 
+const GROUND_WIDTH = CANVAS_WIDTH * 100;
+
 contactListener.BeginContact = function(contactPoint) {
   if(contactPoint.GetFixtureA().GetBody().GetUserData().id == "Ground") {
     if(contactPoint.GetFixtureB().GetBody().GetUserData().id == "Head") {
@@ -71,22 +73,38 @@ function preload() {
 
 
 function setup() {
-
   let motorSpeed = 10 * PI;
   canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
   canvas.position((windowWidth - canvas.width) / 2, (windowHeight - canvas.height) / 2);
   controlsInstructions = createP("Press the right arrow key to accelerate, press the left arrow key to brake/go backwards");
   controlsInstructions.position(canvas.x + CANVAS_WIDTH / 4, canvas.y - CANVAS_HEIGHT / 12);
   world = new b2World(new b2Vec2(0, 10), true);
-  ground = new Ground(CANVAS_WIDTH * 10);
+  ground = new Ground(GROUND_WIDTH);
   car = new Car(CAR_BODY_WIDTH * 2, CAR_HEIGHT, CAR_BODY_WIDTH, CAR_HEIGHT, WHEEL_RADIUS, motorSpeed);
   world.SetContactListener(contactListener);
 }
 
 
 function keyPressed() {
-  if(keyCode == RIGHT_ARROW) {
+  if(gameOver && keyCode == UP_ARROW) {
+    panX = 0;
+    score = 0;
+    world.DestroyBody(car.chassisBody);
+    world.DestroyBody(car.person.head.body);
+    world.DestroyBody(car.person.body.body);
+    world.DestroyBody(car.wheels[0].body);
+    world.DestroyBody(car.wheels[1].body);
+    world.DestroyBody(car.axles[0].body);
+    world.DestroyBody(car.axles[1].body);
+
+
+    gameOver = false;
+    let motorSpeed = 10 * PI;
+    car = new Car(CAR_BODY_WIDTH * 2, CAR_HEIGHT, CAR_BODY_WIDTH, CAR_HEIGHT, WHEEL_RADIUS, motorSpeed);
+
+  } else if(keyCode == RIGHT_ARROW) {
       car.motorOn(true);
+
   } else if(keyCode == LEFT_ARROW) {
       car.motorOn(false);
   }
@@ -133,13 +151,18 @@ function draw() {
 
 function computeScore() {
   prevScore = score;
-  if(!win) {
+  // if the player has not won or lost the game, continue to calculate the score
+  if(!win && !gameOver) {
     score = Math.floor(((car.chassisBody.GetPosition().x * SCALE) - car.x) / SCALE);
   }
 
-  // to ensure score does not decreases
-  if(score < prevScore) {
+  // to ensure score does not decrease
+  if(score < prevScore && !gameOver) {
     score = prevScore;
+  }
+
+  if(highScore < score && gameOver) {
+    highScore = score;
   }
 }
 
@@ -148,6 +171,8 @@ function displayScore() {
   textSize(20);
   let scoreLabel = "Score: " + score + " m";
   text(scoreLabel, CANVAS_WIDTH / 20, CANVAS_HEIGHT / 10);
+  let highScoreLabel = "High Score: " + highScore + " m";
+  text(highScoreLabel, CANVAS_WIDTH / 5, CANVAS_HEIGHT / 10);
 }
 
 // function which computes the result of the game
@@ -166,7 +191,7 @@ function displayResult() {
     fill(0);
     textSize(20);
     let gameOverLabel = "Game Over";
-    let restartInstructionsLabel = "Press F5 to restart";
+    let restartInstructionsLabel = "Press Up Arrow to restart";
     text(gameOverLabel, (CANVAS_WIDTH - textWidth(gameOverLabel)) / 2, (CANVAS_HEIGHT - textAscent()) / 2);
     text(restartInstructionsLabel, (CANVAS_WIDTH - textWidth(restartInstructionsLabel)) / 2, ((CANVAS_HEIGHT - textAscent()) / 2) + 20);
 
@@ -174,14 +199,13 @@ function displayResult() {
     fill(0);
     textSize(20);
     let winLabel = "You Win";
-    let restartInstructionsLabel = "Press F5 to restart";
+    let restartInstructionsLabel = "Press F5 to replay";
     text(winLabel, (CANVAS_WIDTH - textWidth(winLabel)) / 2, (CANVAS_HEIGHT - textAscent()) / 2);
     text(restartInstructionsLabel, (CANVAS_WIDTH - textWidth(restartInstructionsLabel)) / 2, ((CANVAS_HEIGHT - textAscent()) / 2) + 20);
 
   }
 
 }
-
 
 let ground;
 
@@ -204,6 +228,8 @@ let canvas;
 let score;
 
 let prevScore;
+
+let highScore = 0;
 
 let gameOver = false;
 

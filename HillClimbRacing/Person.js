@@ -9,8 +9,7 @@ class Person {
     this.bodyHeight = bodyHeight;
     this.head;
     this.body;
-    // refers to the whole of the body
-    this.personBody;
+    
     this.headRevoluteJoint;
     this.headDistanceJoint;
 
@@ -57,7 +56,7 @@ class Head {
     let fixDef = new b2FixtureDef();
     fixDef.friction = 0.1;
     fixDef.restitution = 0.3;
-    fixDef.density = 1;
+    fixDef.density = 0.6;
     fixDef.shape = new b2CircleShape(this.width / 2 / SCALE);
 
     this.body = world.CreateBody(bodyDef);
@@ -101,7 +100,7 @@ class Body {
     let fixDef = new b2FixtureDef();
     fixDef.friction = 0.4;
     fixDef.restitution = 0.3;
-    fixDef.density = 0.5;
+    fixDef.density = 0.3;
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsBox(this.width / 2 / SCALE, this.height / 2 / SCALE);
 
